@@ -1,49 +1,50 @@
-// Moda - Discord Censor Bot
-
 const { Client, GatewayIntentBits } = require("discord.js");
 const express = require("express");
+require("dotenv").config();
 
-// Keep Render alive
 const app = express();
-app.get("/", (req, res) => res.send("✅ Moda Censor Bot is running!"));
-app.listen(5000, () => console.log("🌐 Express server running on port 5000"));
+const PORT = process.env.PORT || 5000;
 
-// Create Discord client
+// Express server for uptime
+app.get("/", (req, res) => {
+  res.send("✅ Moda bot is running!");
+});
+app.listen(PORT, () => {
+  console.log(`✅ Express server running on port ${PORT}`);
+});
+
+// --- Discord Bot Setup ---
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent,
-  ],
+    GatewayIntentBits.MessageContent // Needed for filtering messages
+  ]
 });
 
-// List of banned words
-const bannedWords = ["badword1", "badword2", "stupid", "idiot"]; // customize these
+// 👿 Words to filter (you can expand this)
+const badWords = ["badword1", "badword2", "stupid", "idiot"];
 
-// On bot ready
 client.once("ready", () => {
-  console.log(`🤖 Moda Censor Bot is online as ${client.user.tag}`);
+  console.log(`🤖 Logged in as ${client.user.tag}`);
 });
 
-// On message
-client.on("messageCreate", async (message) => {
-  if (message.author.bot) return;
+client.on("messageCreate", (message) => {
+  if (message.author.bot) return; // ignore bots
 
   const content = message.content.toLowerCase();
 
-  // Check if message contains banned word
-  if (bannedWords.some(word => content.includes(word))) {
-    try {
-      await message.delete();
-      await message.channel.send(
-        `⚠️ ${message.author}, your message contained inappropriate language and was removed by Moda.`
+  for (let word of badWords) {
+    if (content.includes(word)) {
+      message.delete().catch(() => {});
+      message.channel.send(
+        `${message.author}, 🚫 your message contained a banned word and was removed.`
       );
-      console.log(`❌ Deleted a censored message from ${message.author.tag}`);
-    } catch (err) {
-      console.error("❌ Failed to delete message:", err);
+      break;
     }
   }
 });
 
-// Login
+// Login the bot
 client.login(process.env.TOKEN);
+
