@@ -1,50 +1,49 @@
 const { Client, GatewayIntentBits } = require("discord.js");
-const express = require("express");
 require("dotenv").config();
 
-const app = express();
-const PORT = process.env.PORT || 5000;
-
-// Express server for uptime
-app.get("/", (req, res) => {
-  res.send("✅ Moda bot is running!");
-});
-app.listen(PORT, () => {
-  console.log(`✅ Express server running on port ${PORT}`);
-});
-
-// --- Discord Bot Setup ---
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent // Needed for filtering messages
+    GatewayIntentBits.MessageContent
   ]
 });
 
-// 👿 Words to filter (you can expand this)
-const badWords = ["badword1", "badword2", "stupid", "idiot"];
+// List of bad words (expand as needed)
+const badWords = [
+  "fuck",
+  "shit",
+  "bitch",
+  "asshole",
+  "bastard",
+  "dick",
+  "cunt"
+];
 
 client.once("ready", () => {
-  console.log(`🤖 Logged in as ${client.user.tag}`);
+  console.log(`✅ Moda is online as ${client.user.tag}`);
 });
 
-client.on("messageCreate", (message) => {
-  if (message.author.bot) return; // ignore bots
+client.on("messageCreate", async (message) => {
+  if (message.author.bot) return; // ignore bot messages
 
   const content = message.content.toLowerCase();
 
-  for (let word of badWords) {
-    if (content.includes(word)) {
-      message.delete().catch(() => {});
-      message.channel.send(
-        `${message.author}, 🚫 your message contained a banned word and was removed.`
+  // check for bad words
+  const foundBadWord = badWords.find(word => content.includes(word));
+
+  if (foundBadWord) {
+    try {
+      await message.delete();
+      await message.channel.send(
+        `🚫 Message from **${message.author.username}** deleted: contained inappropriate word (**${foundBadWord}**)`
       );
-      break;
+    } catch (err) {
+      console.error("❌ Error deleting message:", err);
     }
   }
 });
 
-// Login the bot
 client.login(process.env.TOKEN);
+
 
