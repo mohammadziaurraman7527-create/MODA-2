@@ -1,15 +1,12 @@
 {
-  "name": "moda-bot",
+  "name": "moda-censor-bot",
   "version": "1.0.0",
-  "description": "Discord censor bot",
   "main": "index.js",
-  "scripts": {
-    "start": "node index.js"
-  },
+  "scripts": { "start": "node index.js" },
   "dependencies": {
-    "discord.js": "^14.15.3",
+    "discord.js": "^14.16.3",
     "express": "^4.19.2",
-    "dotenv": "^16.4.5"
+    "dotenv": "^16.4.5",
+    "leo-profanity": "^1.7.0"
   }
 }
-
